@@ -1,7 +1,7 @@
 
 # # Canopy Radiative Transfer Example #1
-# This example will go through the calculations of hemispheric and bidirectional reflectance as well as emission of Solar Induced Chlorophyll Fluorescence (SIF). The sun sensor geometry is defined by the solar zenith angle SZA, the viewing zenith angle VZA (observer, 0degrees=Nadir looking) and the relative azimuth angle between the sun and observer (0 or 180degrees denoting the principal plane). 
-# 
+# This example will go through the calculations of hemispheric and bidirectional reflectance as well as emission of Solar Induced Chlorophyll Fluorescence (SIF). The sun sensor geometry is defined by the solar zenith angle SZA, the viewing zenith angle VZA (observer, 0degrees=Nadir looking) and the relative azimuth angle between the sun and observer (0 or 180degrees denoting the principal plane).
+#
 
 ## Use Julia Plots package and switch to plotly js option:
 using PyPlot
@@ -17,7 +17,7 @@ using Parameters
 # Now include the Land modules
 
 using Land
-using Land.CanopyRT
+using Land.CanopyRadiation
 #----------------------------------------------------------------------------
 
 # and unpack some of the mostly used variables or structure (same as writing CanopyRT.leafbio)
@@ -33,7 +33,7 @@ using Land.CanopyRT
 # * *canRad* includes radiation computed within the Canopy RT module (mutable struct struct_canopyRadiation)
 # * *sunRad* provides incoming direct and diffuse incoming solar radiation (mutable struct incomingRadiation)
 # * *soil* provides soil albedo and skin temperature
-# 
+#
 # as well as some arrays:
 # * *wl* is the wavelength grid (nm) for the solar radiation computation
 # * *wle* is the wavelength grid in the photosynthetically active range (a subset of wl, used to define fluorescence excitation and driving photosynthesis)
@@ -43,12 +43,12 @@ using Land.CanopyRT
 
 const FT = Float32
 
-wl_set = create_wl_para_set(FT)
-leaf = create_leaf_bio(FT, wl_set.nwl, wl_set.nWlE, wl_set.nWlF);
-canopy_rt = Canopy4RT{FT}(nlayers=20, LAI=3)
-canRad_rt = CanopyRadiation{FT, wl_set.nwl, wl_set.nWlF, length(canopy_rt.litab), length(canopy_rt.lazitab), canopy_rt.nlayers}()
-canOpt_rt = create_canopy_optical(FT, wl_set.nwl, canopy_rt.nlayers, length(canopy_rt.lazitab), length(canopy_rt.litab); using_marray=false)
-sunRad_rt = create_incoming_radiation(FT, wl_set.swl);
+wl_set    = WaveLengths{FT}();
+leaf      = create_leaf_bios(FT, wl_set.nwl, wl_set.nWlE, wl_set.nWlF);
+canopy_rt = Canopy4RT{FT}(nLayer=20, LAI=FT(3));
+canRad_rt = CanopyRads{FT}(nWL=wl_set.nwl, nWLf=wl_set.nWlF, nIncl=length(canopy_rt.litab), nAzi=length(canopy_rt.lazitab), nLayer=canopy_rt.nLayer);
+canOpt_rt = create_canopy_opticals(FT, wl_set.nwl, canopy_rt.nLayer, length(canopy_rt.lazitab), length(canopy_rt.litab));
+sunRad_rt = create_incoming_radiation(wl_set.swl);
 
 ## show leaf Chlorophyll content:
 @show leaf.Cab
@@ -56,14 +56,14 @@ sunRad_rt = create_incoming_radiation(FT, wl_set.swl);
 
 # ---
 # ## Leaf Optical Properties
-# 
-# Now we can first run fluspect, which is an extension of the Prospect leaf optical properties program and includes computations of the fluorescence emission responses as well. CanopyRT.optis includes all pigment absorption cross sections as well as refractive index of water to compute leaf optical properties. 
+#
+# Now we can first run fluspect, which is an extension of the Prospect leaf optical properties program and includes computations of the fluorescence emission responses as well. CanopyRT.optis includes all pigment absorption cross sections as well as refractive index of water to compute leaf optical properties.
 # For details, see:
-# 
+#
 # Féret, J.B., Gitelson, A.A., Noble, S.D. and Jacquemoud, S., 2017. PROSPECT-D: Towards modeling leaf optical properties through a complete lifecycle. Remote Sensing of Environment, 193, pp.204-215.
-# 
+#
 # Van der Tol, C., Verhoef, W., Timmermans, J., Verhoef, A. and Su, Z., 2009. An integrated model of soil-canopy spectral radiances, photosynthesis, fluorescence, temperature and energy balance. Biogeosciences, 6(12).
-# 
+#
 # Vilfan, N., Van der Tol, C., Muller, O., Rascher, U. and Verhoef, W., 2016. Fluspect-B: A model for leaf fluorescence, reflectance and transmittance spectra. Remote sensing of environment, 186, pp.596-615.
 
 ## Run Fluspect:
@@ -71,8 +71,8 @@ fluspect!(leaf, wl_set);
 #----------------------------------------------------------------------------
 
 # #### Fluorescence excitation matrices
-# Now we can visualize the fluorescence excitatiom matrices, which determine how absorbed photons at a specific wavelength *wle* incident on the leaf are emitted backwards (in relation to the incident light but hemispherically diffuse here) or forward. Here, we ignore contributions from Photosystem I and just use a fixed shape as input at the chloroplast level for Photosystem II, hence all spectral shapes are determined by the light distribution within the leaf. Several effects can be observed in the plots below: The first SIF peak at 680nm is much weaker in the forward direction than in the backward direction as more the re-absorption within the leaf is much higher for the forward direction. Similarly, blue incident light penetrates the leaf less than at higher wavelengths, so the chlorophyll re-absorption (backwards) is less re-absorbed by chlorophyll as it emanates from less deep layers. 
-# 
+# Now we can visualize the fluorescence excitatiom matrices, which determine how absorbed photons at a specific wavelength *wle* incident on the leaf are emitted backwards (in relation to the incident light but hemispherically diffuse here) or forward. Here, we ignore contributions from Photosystem I and just use a fixed shape as input at the chloroplast level for Photosystem II, hence all spectral shapes are determined by the light distribution within the leaf. Several effects can be observed in the plots below: The first SIF peak at 680nm is much weaker in the forward direction than in the backward direction as more the re-absorption within the leaf is much higher for the forward direction. Similarly, blue incident light penetrates the leaf less than at higher wavelengths, so the chlorophyll re-absorption (backwards) is less re-absorbed by chlorophyll as it emanates from less deep layers.
+#
 
 ## Plot Mb matrix
 figure()
@@ -131,13 +131,13 @@ gcf()
 #----------------------------------------------------------------------------
 
 # ---
-# ### Leaf reflectance and transmission 
+# ### Leaf reflectance and transmission
 # Within Fluspect, leaf reflectance and transmission is calculated (this part is actually identical to what PROSPECT is doing and much less involved than the Fluorescence part). The model basically uses a doubling adding routine to solve for the radiative transfer within the leaf using constituent absorption cross sections and constituent abundances in the leaf (assuming vertically homogenous distribution).
-# 
+#
 # Here, we just create another leaf with different concentrations to show the impact on leaf reflectance and transmission due to changes in chlorophyll content and liquid water content (mostly in the two liquid water absorption bands at 1400 and 1900nm).
 
 ## Let's create a leaf with a different Cab and Cw (water) content (<span style="color:red">Try changing other pigment contents, plot leaf reflectance and transmissions and explain where (spectrally) and why reflectance and transmission changes</span>):
-leaf_2 = create_leaf_bio(FT, wl_set.nwl, wl_set.nWlE, wl_set.nWlF);
+leaf_2 = create_leaf_bios(FT, wl_set.nwl, wl_set.nWlE, wl_set.nWlF);
 leaf_2.Cab = 80
 leaf_2.Cw = 0.012
 ## show leaf Chlorophyll content:
@@ -157,16 +157,16 @@ gcf()
 
 # ---
 # ## Moving from the leaf to the entire canopy
-# 
+#
 # Our model here is based on mSCOPE[^1] and we can prescribe different leaf optical properties within a complex canopy. At the moment, the leaf angular distribution is the same vertically (but could be changed in the future).
-# 
+#
 # [^1]: Yang, P., Verhoef, W. and van der Tol, C., 2017. The mSCOPE model: A simple adaptation to the SCOPE model to describe reflectance, fluorescence and photosynthesis of vertically heterogeneous canopies. Remote sensing of environment, 201, pp.1-11.
-# 
+#
 
-## This is to be changed later but at the moment, we need to generate an Array of leaves, basically for each layer of the canopy 
+## This is to be changed later but at the moment, we need to generate an Array of leaves, basically for each layer of the canopy
 
-arrayOfLeaves = [create_leaf_bio(FT, wl_set.nwl, wl_set.nWlE, wl_set.nWlF) for i in 1:canopy_rt.nlayers]
-for i in 1:canopy_rt.nlayers
+arrayOfLeaves = [create_leaf_bios(FT, wl_set.nwl, wl_set.nWlE, wl_set.nWlF) for i in 1:canopy_rt.nLayer]
+for i in 1:canopy_rt.nLayer
     fluspect!(arrayOfLeaves[i],  wl_set)
 end
 #----------------------------------------------------------------------------
@@ -175,17 +175,17 @@ end
 # Below are the basic steps for the canopy radiative transfer (SIF fluxes are dependent on stress levels at each leaf but here we use a standard SIF yield for now):
 
 ## Set Soil albedo to 0.2
-soil = SoilOpti{FT}(wl_set.wl, FT(0.2)*ones(FT, length(wl_set.wl)), FT[0.1], FT(290.0))
+soil   = SoilOpticals{FT}(wl_set.wl, FT(0.2)*ones(FT, length(wl_set.wl)), FT[0.1], FT(290.0))
 angles = SolarAngles{FT}()
 
 ## Compute Canopyoptical properties dependend on sun-sensor and leaf angle distributions:
-compute_canopy_geometry!(canopy_rt, angles, canOpt_rt)
+canopy_geometry!(canopy_rt, angles, canOpt_rt);
 ## Compute RT matrices with leaf reflectance and transmissions folded in:
-compute_canopy_matrices!(arrayOfLeaves, canOpt_rt);
+canopy_matrices!(arrayOfLeaves, canOpt_rt);
 ## Perform SW radiation transfer:
-simulate_short_wave!(canopy_rt, canOpt_rt, canRad_rt, sunRad_rt, soil);
+short_wave!(canopy_rt, canOpt_rt, canRad_rt, sunRad_rt, soil);
 ## Compute outgoing SIF flux (using constant fluorescence efficiency at the chloroplast level)
-derive_canopy_fluxes!(canopy_rt, canOpt_rt, canRad_rt, sunRad_rt, soil, arrayOfLeaves, wl_set);
+canopy_fluxes!(canopy_rt, canOpt_rt, canRad_rt, sunRad_rt, soil, arrayOfLeaves, wl_set);
 #----------------------------------------------------------------------------
 
 # ### Test a VZA dependence in the principal plane
@@ -204,16 +204,16 @@ angles.tts=30
 angles.psi=0
 ## LAI of 3:
 canopy_rt.LAI = 3
-## Define VZA 
+## Define VZA
 VZA=collect(-89.5:0.5:89.5)
 
 for VZA_ in VZA
     angles.tto=VZA_
-    compute_canopy_geometry!(canopy_rt, angles, canOpt_rt)
-    compute_canopy_matrices!(arrayOfLeaves, canOpt_rt);
-    simulate_short_wave!(canopy_rt, canOpt_rt, canRad_rt, sunRad_rt, soil);
-    computeSIF_Fluxes!(arrayOfLeaves, canOpt_rt, canRad_rt, canopy_rt, soil, wl_set);
-    ## Handpicked indices in 
+    canopy_geometry!(canopy_rt, angles, canOpt_rt)
+    canopy_matrices!(arrayOfLeaves, canOpt_rt);
+    short_wave!(canopy_rt, canOpt_rt, canRad_rt, sunRad_rt, soil);
+    sif_fluxes!(arrayOfLeaves, canOpt_rt, canRad_rt, canopy_rt, soil, wl_set);
+    ## Handpicked indices in
     push!(reflVIS, canRad_rt.alb_obs[ind_red])
     push!(reflNIR, canRad_rt.alb_obs[ind_NIR])
     push!(SIF_R , canRad_rt.SIF_obs[ind_wlf_R])
@@ -221,7 +221,7 @@ for VZA_ in VZA
 end
 #----------------------------------------------------------------------------
 
-## Plots Visible 
+## Plots Visible
 figure()
 plot(VZA, reflVIS, label="Red Reflectance", lw=2)
 plot(VZA, SIF_R/30, label="Red SIF (/30)", lw=2)
@@ -253,11 +253,10 @@ for psi=0:360
     angles.psi=psi
     for VZA=0:1:85
         angles.tto=VZA
-
-        compute_canopy_geometry!(canopy_rt, angles, canOpt_rt)
-        compute_canopy_matrices!(arrayOfLeaves, canOpt_rt);
-        simulate_short_wave!(canopy_rt, canOpt_rt, canRad_rt, sunRad_rt, soil);
-        computeSIF_Fluxes!(arrayOfLeaves, canOpt_rt, canRad_rt, canopy_rt, soil, wl_set);
+        canopy_geometry!(canopy_rt, angles, canOpt_rt)
+        canopy_matrices!(arrayOfLeaves, canOpt_rt);
+        short_wave!(canopy_rt, canOpt_rt, canRad_rt, sunRad_rt, soil);
+        sif_fluxes!(arrayOfLeaves, canOpt_rt, canRad_rt, canopy_rt, soil, wl_set);
         push!(reflVIS, canRad_rt.alb_obs[28])
         push!(reflNIR, canRad_rt.alb_obs[52])
         push!(SIF_R , canRad_rt.SIF_obs[8])
