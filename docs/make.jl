@@ -7,12 +7,15 @@ mkpath(generated_dir)
 include("list_of_tutorials.jl")          # defines a dict `tutorials`
 
 pages = Any[
-    "Home"           => "index.md",
-    "Tips"           => "pages/Tips.md",
-    "Hydraulics"     => "pages/Hydraulics.md",
-    "Photosynthesis" => "pages/Photosynthesis.md",
-    "CanopyRT"       => "pages/CanopyRT.md",
-    "Utils"          => "pages/Utils.md",
+    "Home"            => "index.md",
+    "Tips"            => "pages/Tips.md",
+    "PlantHydraulics" => "pages/PlantHydraulics.md",
+    "Photosynthesis"  => "pages/Photosynthesis.md",
+    "CanopyRadiation" => "pages/CanopyRadiation.md",
+    "StomataModels"   => "pages/StomataModels.md",
+    "Utils"          => Any[
+                            "ConstrainedRootSolvers" => "pages/ConstrainedRootSolvers.md",
+                            "WaterPhysics"           => "pages/WaterPhysics.md"],
     "Tutorials"      => tutorials,
     ]
 

@@ -9,13 +9,13 @@
 Computes 2-stream diffusive radiation transport for thermal radiation (calls `compute_diffusive_S` internally).
 Layer reflectance and transmission is computed from LW optical properties, layer sources from temperature and Planck law, boundary conditions from the atmosphere and soil emissivity and temperature.
 Currently only uses Stefan Boltzmann law to compute spectrally integrated LW but can be easily adjusted to be spectrally resolved.
-- `leaf_array` An array of [`LeafBioArray`](@ref) type struct (i.e. leaf optical properties can change with canopy height)
-- `can_opt` A [`CanopyOptiArray`](@ref) struct for providing optical layer properties
-- `can_rad` A [`CanopyRadiation`](@ref) struct
+- `leaf_array` An array of [`LeafBios`](@ref) type struct (i.e. leaf optical properties can change with canopy height)
+- `can_opt` A [`CanopyOpticals`](@ref) struct for providing optical layer properties
+- `can_rad` A [`CanopyRads`](@ref) struct
 - `can` A [`Canopy4RT`](@ref) type struct for providing LAI and nLayer and clumping
-- `sO` A [`SoilOpti`](@ref) type struct for soil optical properties
+- `sO` A [`SoilOpticals`](@ref) type struct for soil optical properties
 - `incLW` A 1D array with incoming long-wave radiation
-- `wl_set` An [`WLParaSetArray`](@ref) type struct
+- `wl_set` An [`WaveLengths`](@ref) type struct
 """
 function thermal_fluxes!(
             leaf_array::Array{LeafBios{FT},1},
