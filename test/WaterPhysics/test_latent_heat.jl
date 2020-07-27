@@ -5,7 +5,6 @@ println("\nTesting and Benchmarking latent_heat_vapor functions...");
         rand_T  = rand(FT) + 298
         rand_Tl = rand(FT,10) .+ 298
         for result in [ latent_heat_vapor(rand_T),
-                        latent_heat_vapor(rand_Tl),
                         latent_heat_vapor.(rand_Tl) ]
             recursive_FT_test(result, FT);
             recursive_NaN_test(result);
@@ -14,7 +13,6 @@ println("\nTesting and Benchmarking latent_heat_vapor functions...");
         if benchmarking
             @show FT;
             @btime latent_heat_vapor($rand_T);
-            @btime latent_heat_vapor($rand_Tl);
             @btime latent_heat_vapor.($rand_Tl);
         end
     end

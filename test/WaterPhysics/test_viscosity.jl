@@ -5,10 +5,8 @@ println("\nTesting and Benchmarking viscosity* functions...");
         rand_T  = rand(FT) + 298
         rand_Tl = rand(FT,10) .+ 298
         for result in [ viscosity(rand_T),
-                        viscosity(rand_Tl),
                         viscosity.(rand_Tl),
                         relative_viscosity(rand_T),
-                        relative_viscosity(rand_Tl),
                         relative_viscosity.(rand_Tl) ]
             recursive_FT_test(result, FT);
             recursive_NaN_test(result);
@@ -19,10 +17,8 @@ println("\nTesting and Benchmarking viscosity* functions...");
         if benchmarking
             @show FT;
             @btime viscosity($rand_T);
-            @btime viscosity($rand_Tl);
             @btime viscosity.($rand_Tl);
             @btime relative_viscosity($rand_T);
-            @btime relative_viscosity($rand_Tl);
             @btime relative_viscosity.($rand_Tl);
         end
     end
