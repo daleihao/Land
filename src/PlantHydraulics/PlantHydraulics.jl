@@ -1,12 +1,13 @@
 module PlantHydraulics
 
 using CLIMAParameters
-using ConstrainedRootSolvers
 using DocStringExtensions
 using Parameters
 using Revise
 using Statistics
-using WaterPhysics
+
+using ..ConstrainedRootSolvers
+using ..WaterPhysics
 
 
 

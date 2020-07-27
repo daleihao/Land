@@ -16,8 +16,8 @@ const AVOGADRO    = avogad()
 const H_PLANCK    = h_Planck()
 const K_BOLTZMANN = k_Boltzmann()
 const LIGHT_SPEED = light_speed()
-const file_Opti   = joinpath(@__DIR__, "../data/Optipar2017_ProspectD.mat")
-const file_Sun    = joinpath(@__DIR__, "../data/sun.mat")
+const file_Opti   = joinpath(@__DIR__, "../../data/Optipar2017_ProspectD.mat")
+const file_Sun    = joinpath(@__DIR__, "../../data/sun.mat")
 
 
 

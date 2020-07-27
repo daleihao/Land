@@ -1,17 +1,18 @@
 module Plants
 
-using CanopyRadiation
 using CLIMAParameters
-using ConstrainedRootSolvers
 using DataFrames
 using DocStringExtensions
 using Parameters
-using Photosynthesis
-using PlantHydraulics
 using Revise
 using Statistics
-using StomataModels
-using WaterPhysics
+
+using ..CanopyRadiation
+using ..ConstrainedRootSolvers
+using ..Photosynthesis
+using ..PlantHydraulics
+using ..StomataModels
+using ..WaterPhysics
 
 Planet = CLIMAParameters.Planet
 

@@ -1,12 +1,13 @@
 module StomataModels
 
 using CLIMAParameters
-using ConstrainedRootSolvers
 using DocStringExtensions
 using Parameters
-using Photosynthesis
-using PlantHydraulics
-using WaterPhysics
+
+using ..ConstrainedRootSolvers
+using ..Photosynthesis
+using ..PlantHydraulics
+using ..WaterPhysics
 
 
 
