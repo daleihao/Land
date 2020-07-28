@@ -54,6 +54,7 @@ export annual_profit,
        big_leaf_partition!,
        create_dataframe,
        gain_risk_map,
+       initialize_spac_canopy!,
        leaf_allocation!,
        leaf_gas_exchange!,
        leaf_gas_exchange_nonopt!,
@@ -63,6 +64,7 @@ export annual_profit,
        optimize_flows!,
        optimize_leaf!,
        ppm_to_Pa,
+       test_soil,
        zenith_angle
 
 
@@ -81,7 +83,9 @@ include("bigleaf/temperature.jl" )
 include("investment/leafallocation.jl")
 include("investment/optimizeleaf.jl"  )
 
+include("layers/initializert.jl")
 include("layers/test_diurnal.jl")
+include("layers/test_soil.jl"   )
 
 include("planet/atmpressure.jl")
 include("planet/solarangle.jl" )
